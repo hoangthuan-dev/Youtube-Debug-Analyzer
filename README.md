@@ -2,7 +2,7 @@
 
 Công cụ web hiện đại giúp bạn **phân tích thông tin từ JSON debug của YouTube** (thường lấy từ chức năng “Sao chép thông tin gỡ lỗi”). Ứng dụng giúp bạn nhanh chóng trích xuất các đường link như video chính, quảng cáo, kênh, thumbnail và các thông tin nâng cao khác.
 
-![Screenshot]([preview.png](https://github.com/hoangthuan-dev/Youtube-Debug-Analyzer/blob/main/Screenshot.png))
+![Screenshot](Screenshot.png)
 
 ## 🚀 Tính Năng
 
