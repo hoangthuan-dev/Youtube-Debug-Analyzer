@@ -91,7 +91,7 @@ npx serve .
 
 ## 📸 Demo Online
 
-👉 [Xem bản demo](https://<your-github-username>.github.io/phan-tich-debug-youtube/) (nếu đã bật GitHub Pages)
+👉 [Xem bản demo](https://hoangthuan-dev.github.io/Youtube-Debug-Analyzer/)
 
 ---
 
