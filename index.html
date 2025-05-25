@@ -222,7 +222,21 @@ box-sizing: border-box;
 
     html += `<h3>8. Thông tin nâng cao khác:</h3>`;
     html += `<p>Tổng số trường JSON: ${Object.keys(json).length}</p>`;
-
+    
+    // 9. Link website quảng cáo
+    html += `<h3>9. Link website quảng cáo:</h3>`;
+    const rawText = JSON.stringify(json);
+    
+    const advertiserMatch = rawText.match(/ytp-visit-advertiser-link__text\\*"?>([^<\\"]+)/);
+    
+    if (advertiserMatch && advertiserMatch[1]) {
+      const domain = advertiserMatch[1].trim();
+      const fullLink = `https://${domain}`;
+      html += `<a href="${fullLink}" target="_blank">${fullLink}</a>`;
+    } else {
+      html += `<p>Không tìm thấy</p>`;
+    }
+    
     document.getElementById("results").innerHTML = html;
   }
 
