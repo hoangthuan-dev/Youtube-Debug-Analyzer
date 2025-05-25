@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Phân Tích Debug YouTube</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    :root {
+      --bg: #f4f4f9;
+      --text: #222;
+      --card: #fff;
+      --accent: #007bff;
+    }
+
+    [data-theme="dark"] {
+      --bg: #121212;
+      --text: #eee;
+      --card: #1e1e1e;
+      --accent: #4dabf7;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      background: var(--card);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    textarea {
+      width: 100%;
+max-width: 100%;
+box-sizing: border-box;
+      height: 160px;
+      padding: 15px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      background: var(--bg);
+      color: var(--text);
+      margin-bottom: 20px;
+      resize: vertical;
+    }
+
+    button, select {
+      padding: 10px 16px;
+      font-size: 16px;
+      margin: 5px;
+      border: none;
+      border-radius: 8px;
+      background: var(--accent);
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover, select:hover {
+      background: #0056b3;
+    }
+
+    .dark-toggle {
+      float: right;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .result-section h3 {
+      margin-top: 20px;
+    }
+
+    .result-section a {
+      display: block;
+      color: var(--accent);
+      word-break: break-word;
+      margin: 5px 0;
+    }
+
+    .result-section p {
+      background: #ddd;
+      color: #333;
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin: 8px 0;
+    }
+
+    [data-theme="dark"] .result-section p {
+      background: #2a2a2a;
+      color: #eee;
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 22px; }
+      button, select { width: 100%; margin: 8px 0; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="dark-toggle">
+    <label><input type="checkbox" id="themeToggle"> 🌙 Dark Mode</label>
+  </div>
+  <h1>Phân Tích Debug YouTube</h1>
+
+  <textarea id="debugInput" placeholder="Dán nội dung 'Sao chép thông tin gỡ lỗi' từ YouTube..."></textarea>
+
+  <div>
+    <button onclick="analyzeDebug()">Phân tích</button>
+    <select id="historySelect" onchange="loadFromHistory(this.value)">
+      <option value="">⏳ Phân tích gần đây</option>
+    </select>
+  </div>
+
+  <div id="results" class="result-section"></div>
+</div>
+
+<script>
+  // Dark Mode setup
+  const themeToggle = document.getElementById("themeToggle");
+  if (localStorage.getItem("theme") === "dark") {
+    document.documentElement.setAttribute("data-theme", "dark");
+    themeToggle.checked = true;
+  }
+  themeToggle.addEventListener("change", () => {
+    const theme = themeToggle.checked ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  });
+
+  // Lưu & tải lịch sử
+  function saveToHistory(raw) {
+    let history = JSON.parse(localStorage.getItem("debugHistory") || "[]");
+    if (!history.includes(raw)) {
+      history.unshift(raw);
+      if (history.length > 10) history = history.slice(0, 10);
+      localStorage.setItem("debugHistory", JSON.stringify(history));
+      populateHistoryDropdown();
+    }
+  }
+
+  function populateHistoryDropdown() {
+    const history = JSON.parse(localStorage.getItem("debugHistory") || "[]");
+    const select = document.getElementById("historySelect");
+    select.innerHTML = `<option value="">⏳ Phân tích gần đây</option>`;
+    history.forEach((item, i) => {
+      select.innerHTML += `<option value="${i}">Mục ${i + 1}</option>`;
+    });
+  }
+
+  function loadFromHistory(index) {
+    if (index === "") return;
+    const history = JSON.parse(localStorage.getItem("debugHistory") || "[]");
+    const raw = history[parseInt(index)];
+    document.getElementById("debugInput").value = raw;
+    analyzeDebug();
+  }
+
+  function analyzeDebug() {
+    const raw = document.getElementById("debugInput").value.trim();
+    if (!raw) return alert("Vui lòng dán nội dung JSON hợp lệ!");
+
+    let json = {};
+    try {
+      json = JSON.parse(raw);
+    } catch {
+      return alert("Nội dung không hợp lệ, phải là JSON!");
+    }
+
+    saveToHistory(raw);
+
+    const docid = json["docid"] || "";
+    const addocid = json["addocid"] || "";
+    const channelId = json["channelId"] || "";
+    const author = json["author"] || "";
+    const nextVideoId = json["nextVideoId"] || "";
+    const cver = json["cver"] || "";
+    const cl = json["cl"] || "";
+
+    let html = "";
+
+    html += `<h3>1. Link video chính:</h3>`;
+    html += docid ? `<a href="https://www.youtube.com/watch?v=${docid}" target="_blank">https://www.youtube.com/watch?v=${docid}</a>` : `<p>Không tìm thấy</p>`;
+
+    html += `<h3>2. Link video quảng cáo:</h3>`;
+    html += addocid ? `<a href="https://www.youtube.com/watch?v=${addocid}" target="_blank">https://www.youtube.com/watch?v=${addocid}</a>` : `<p>Không có quảng cáo</p>`;
+
+    html += `<h3>3. Link kênh đăng video:</h3>`;
+    if (channelId) {
+      html += `<a href="https://www.youtube.com/channel/${channelId}" target="_blank">https://www.youtube.com/channel/${channelId}</a>`;
+    } else if (author) {
+      html += `<a href="https://www.youtube.com/@${author}" target="_blank">https://www.youtube.com/@${author}</a>`;
+    } else {
+      html += `<p>Không có thông tin kênh</p>`;
+    }
+
+    html += `<h3>4. Link video tiếp theo:</h3>`;
+    html += nextVideoId ? `<a href="https://www.youtube.com/watch?v=${nextVideoId}" target="_blank">https://www.youtube.com/watch?v=${nextVideoId}</a>` : `<p>Không có video tiếp theo</p>`;
+
+    html += `<h3>5. Link thumbnail video chính:</h3>`;
+    html += docid ? `<a href="https://i.ytimg.com/vi/${docid}/maxresdefault.jpg" target="_blank">https://i.ytimg.com/vi/${docid}/maxresdefault.jpg</a>` : `<p>Không tìm thấy</p>`;
+
+    html += `<h3>6. Thông tin theo dõi quảng cáo:</h3>`;
+    html += (json["adformat"] || json["afv_ad_tag"] || json["yt_ad"]) ? `<p>Có thông tin tracking</p>` : `<p>Không tìm thấy</p>`;
+
+    html += `<h3>7. Thông tin hiệu suất:</h3>`;
+    html += `<p>cver: ${cver || "Không có"}</p>`;
+    html += `<p>cl: ${cl || "Không có"}</p>`;
+
+    html += `<h3>8. Thông tin nâng cao khác:</h3>`;
+    html += `<p>Tổng số trường JSON: ${Object.keys(json).length}</p>`;
+
+    document.getElementById("results").innerHTML = html;
+  }
+
+  populateHistoryDropdown();
+
+  // PWA service worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js');
+  }
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js').then(() => {
+    console.log("✅ Service Worker đã đăng ký!");
+  }).catch((err) => {
+    console.log("❌ Lỗi khi đăng ký:", err);
+  });
+}
+</script>
+</body>
+</html>
